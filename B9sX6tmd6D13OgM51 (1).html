@@ -1,0 +1,242 @@
+<html><head><base href="https://actionitems.smate-senfinity.follow-up/" />
+<title>Action Items Follow-up (S'mate/Senfinity)</title>
+<style>
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: #f7f9fc;
+    color: #333;
+  }
+  .container {
+    max-width: 1000px;
+    margin: 0 auto;
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    padding: 30px;
+  }
+  h1 {
+    color: #2c3e50;
+    border-bottom: 3px solid #3498db;
+    padding-bottom: 15px;
+    text-align: center;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+  }
+  th, td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #e0e0e0;
+  }
+  th {
+    background-color: #f2f6fa;
+    font-weight: bold;
+    color: #2c3e50;
+  }
+  tr:hover {
+    background-color: #f5f8fa;
+  }
+  .delete-btn {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  .delete-btn:hover {
+    background-color: #c0392b;
+  }
+  .delete-btn:disabled {
+    background-color: #bdc3c7;
+    cursor: not-allowed;
+  }
+  .form-container {
+    background-color: #f2f6fa;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+  }
+  .form-group {
+    margin-bottom: 15px;
+  }
+  .form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+  }
+  .form-group input, .form-group textarea {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+  }
+  .form-group textarea {
+    height: 100px;
+    resize: vertical;
+  }
+  .submit-btn {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  .submit-btn:hover {
+    background-color: #2980b9;
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <h1>Action Items Follow-up (S'mate/Senfinity)</h1>
+    
+    <div class="form-container">
+      <h2>Add New Action Item</h2>
+      <form id="action-form">
+        <div class="form-group">
+          <label for="action">Action Item:</label>
+          <textarea id="action" required></textarea>
+        </div>
+        <div class="form-group">
+          <label for="creator">Creator:</label>
+          <input type="text" id="creator" required>
+        </div>
+        <div class="form-group">
+          <label for="owner">Owner:</label>
+          <input type="text" id="owner" required>
+        </div>
+        <button type="submit" class="submit-btn">Add Action Item</button>
+      </form>
+    </div>
+
+    <table id="action-items">
+      <thead>
+        <tr>
+          <th>Action Item</th>
+          <th>Creator</th>
+          <th>Owner</th>
+          <th>Create Date</th>
+          <th>Delete</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Action items will be dynamically added here -->
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    let actionItems = [
+      {
+        id: 1,
+        action: "Implement new API endpoints for S'mate integration",
+        creator: "John Doe",
+        owner: "Jane Smith",
+        createDate: "2023-06-01",
+        finishedDate: null
+      },
+      {
+        id: 2,
+        action: "Optimize Senfinity database queries",
+        creator: "Mike Johnson",
+        owner: "Sarah Lee",
+        createDate: "2023-06-10",
+        finishedDate: null
+      },
+      {
+        id: 3,
+        action: "Create user documentation for S'mate features",
+        creator: "Emily Brown",
+        owner: "David Wilson",
+        createDate: "2023-06-20",
+        finishedDate: null
+      }
+    ];
+
+    const actionItemsBody = document.querySelector('#action-items tbody');
+    const actionForm = document.getElementById('action-form');
+
+    function renderActionItems() {
+      actionItemsBody.innerHTML = '';
+      actionItems.forEach(item => {
+        const row = document.createElement('tr');
+        const deleteBtn = document.createElement('button');
+        deleteBtn.textContent = 'Delete';
+        deleteBtn.classList.add('delete-btn');
+        deleteBtn.onclick = () => deleteItem(item.id);
+
+        if (item.finishedDate) {
+          const daysUntilDeletion = 7 - Math.floor((new Date() - new Date(item.finishedDate)) / (1000 * 60 * 60 * 24));
+          if (daysUntilDeletion > 0) {
+            deleteBtn.disabled = true;
+            deleteBtn.title = `Will be deleted in ${daysUntilDeletion} day(s)`;
+          }
+        }
+
+        row.innerHTML = `
+          <td>${item.action}</td>
+          <td>${item.creator}</td>
+          <td>${item.owner}</td>
+          <td>${item.createDate}</td>
+          <td></td>
+        `;
+        row.lastElementChild.appendChild(deleteBtn);
+        actionItemsBody.appendChild(row);
+      });
+    }
+
+    function deleteItem(id) {
+      const index = actionItems.findIndex(item => item.id === id);
+      if (index !== -1) {
+        actionItems.splice(index, 1);
+        renderActionItems();
+      }
+    }
+
+    function checkAutoDeletion() {
+      const currentDate = new Date();
+      actionItems.forEach(item => {
+        if (item.finishedDate) {
+          const finishedDate = new Date(item.finishedDate);
+          const daysSinceFinished = Math.floor((currentDate - finishedDate) / (1000 * 60 * 60 * 24));
+          if (daysSinceFinished >= 7) {
+            deleteItem(item.id);
+          }
+        }
+      });
+    }
+
+    actionForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const newItem = {
+        id: Date.now(),
+        action: document.getElementById('action').value,
+        creator: document.getElementById('creator').value,
+        owner: document.getElementById('owner').value,
+        createDate: new Date().toISOString().split('T')[0],
+        finishedDate: null
+      };
+      actionItems.push(newItem);
+      renderActionItems();
+      actionForm.reset();
+    });
+
+    // Initial render
+    renderActionItems();
+
+    // Check for auto-deletion every day
+    setInterval(checkAutoDeletion, 24 * 60 * 60 * 1000);
+
+    // For demonstration purposes, let's also check every 10 seconds
+    setInterval(checkAutoDeletion, 10000);
+  </script>
+</body></html>
